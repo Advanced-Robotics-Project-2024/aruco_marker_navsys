@@ -1,0 +1,8 @@
+aruco_marker_localization:
+  ros__parameters:
+    landmark_num: 4
+    landmarks:
+      ids: [0, 1, 2, 3]
+      xs: [1.5, 1.5, -1.5, -1.5]
+      ys: [0.5, -0.5, 0.5, -0.5]
+

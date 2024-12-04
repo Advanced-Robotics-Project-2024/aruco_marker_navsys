@@ -1,0 +1,3 @@
+# aruco_marker_detector_py
+PythonでARマーカーを検出するパッケージ
+

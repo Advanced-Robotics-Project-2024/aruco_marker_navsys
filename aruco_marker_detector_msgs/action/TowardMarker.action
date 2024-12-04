@@ -1,0 +1,11 @@
+# Goal
+# bool start
+int32 goal_id
+int32 tmp_goal_id
+---
+# Result
+bool success
+int32 id
+---
+# Feedback
+string status
