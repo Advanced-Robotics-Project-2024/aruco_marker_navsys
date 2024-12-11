@@ -44,6 +44,10 @@ ament_auto_add_executable(approach_marker
 	src/approach_marker.cpp
 )
 
+ament_auto_add_executable(action_manager
+	src/action_manager.cpp
+)
+
 ament_auto_package(
 	INSTALL_TO_SHARE
 	config
