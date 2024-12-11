@@ -26,7 +26,7 @@ namespace ArucoMarkerNavigation{
 
 	void ApproachMarker::initParam()
 	{
-		this->declare_parameter("max_linear_vel", 0.22);
+		this->declare_parameter("max_linear_vel", 0.2);
 		this->get_parameter("max_linear_vel", max_linear_vel_);
 		this->declare_parameter("max_angular_vel", 0.3);
 		this->get_parameter("max_angular_vel", max_angular_vel_);
@@ -112,15 +112,16 @@ namespace ArucoMarkerNavigation{
 			}else{
 				msg.linear.x = -max_linear_vel_;
 			}
-			current_diff_direction = ts_[index];
-			if(current_diff_direction > 0.){
-				msg.angular.z = -max_angular_vel_;
-			}else{
-				msg.angular.x = max_angular_vel_;
-			}
+			//current_diff_direction = ts_[index];
+			//if(current_diff_direction > 0.){
+			//	msg.angular.z = -max_angular_vel_;
+			//}else{
+			//	msg.angular.z = max_angular_vel_;
+			//}
 			cmd_vel_pub_->publish(msg);
 			loop_rate.sleep();
-		}while(current_distance - goal_movement_length > torelance_length_error_ || current_diff_direction > torelance_angle_error_); 
+		//}while(current_distance - goal_movement_length > torelance_length_error_ || current_diff_direction > torelance_angle_error_); 
+		}while(abs(current_distance - goal_movement_length) > torelance_length_error_); 
 	//		if(!init_odom){
 	//			last_odom = odom_;
 	//			init_odom = true;
@@ -163,28 +164,28 @@ namespace ArucoMarkerNavigation{
 		odom_ = *msg;
 	}
 
-    void ApproachMarker::markerInfosCb(aruco_marker_detector_msgs::msg::MarkerInfos::ConstSharedPtr msg)
-    {   
-        int id_size = msg->id.size();
-        if(id_size != 0){ 
-            ids_.resize(id_size);
-            xs_.resize(id_size);
-            ys_.resize(id_size);
-            ts_.resize(id_size);
-            for(int i=0; i<id_size; ++i){
-                ids_[i] = msg->id[i];
-                xs_[i] = msg->x[i];
-                ys_[i] = msg->y[i];
-                ts_[i] = msg->t[i];
-                // RCLCPP_INFO(this->get_logger(), "id[%d]: %d", i, ids_[i]);
-            }   
-        }else{
-            ids_.clear();
-            xs_.clear();
-            ys_.clear();
-            ts_.clear();
-        }   
-    }
+	void ApproachMarker::markerInfosCb(aruco_marker_detector_msgs::msg::MarkerInfos::ConstSharedPtr msg)
+	{   
+	    int id_size = msg->id.size();
+	    if(id_size != 0){ 
+	        ids_.resize(id_size);
+	        xs_.resize(id_size);
+	        ys_.resize(id_size);
+	        ts_.resize(id_size);
+	        for(int i=0; i<id_size; ++i){
+	            ids_[i] = msg->id[i];
+	            xs_[i] = msg->x[i];
+	            ys_[i] = msg->y[i];
+	            ts_[i] = msg->t[i];
+	            // RCLCPP_INFO(this->get_logger(), "id[%d]: %d", i, ids_[i]);
+	        }   
+	    }else{
+	        ids_.clear();
+	        xs_.clear();
+	        ys_.clear();
+	        ts_.clear();
+	    }   
+	}
 }
 
 int main(int argc, char * argv[]){
