@@ -95,6 +95,22 @@ namespace ArucoMarkerNavigation{
 			[this]([[maybe_unused]] const GoalHandleAdjustPosition::WrappedResult & result){
 				wait_result_ = false;
 			};
+
+		// ApproachMarker
+		approach_marker_client_ = rclcpp_action::create_client<ApproachMarkerMsg>(this, "approach_marker");
+		approach_marker_goal_options_ = rclcpp_action::Client<ApproachMarkerMsg>::SendGoalOptions();
+		approach_marker_goal_options_.goal_response_callback = 
+			[this](const std::shared_ptr<GoalHandleApproachMarker> & goal_handle){
+				if(!goal_handle){
+					RCLCPP_INFO(this->get_logger(), "Goal was rejected by server");
+				}else{
+					RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
+				}
+			};
+		approach_marker_goal_options_.result_callback = 
+			[this]([[maybe_unused]] const GoalHandleApproachMarker::WrappedResult & result){
+				wait_result_ = false;
+			};
 	}
 
 	rclcpp_action::GoalResponse ActionManager::handle_goal(
@@ -168,6 +184,16 @@ namespace ArucoMarkerNavigation{
 		adjust_direction_client_->async_send_goal(adjust_direction_goal_msg, adjust_direction_goal_options_);
 		waitResult();
 
+		//Send Goal to ApproachMarkrer 
+		ApproachMarkerMsg::Goal approach_marker_goal_msg;
+		approach_marker_goal_msg.goal_id = goal_id;
+		approach_marker_goal_msg.goal_length = goal_length;
+		while(!this->approach_marker_client_->wait_for_action_server()){
+			RCLCPP_INFO(get_logger(), "Waiting for action server...");
+		}
+		wait_result_ = true;
+		approach_marker_client_->async_send_goal(approach_marker_goal_msg, approach_marker_goal_options_);
+		waitResult();
 
 		RCLCPP_INFO(this->get_logger(), "Completed Navigation to Marker(%lf)", goal_length);
 	}

@@ -26,12 +26,12 @@ using RotateActionMsg = aruco_marker_detector_msgs::action::RotateAction;
 using GoalHandleRotateAction = rclcpp_action::ClientGoalHandle<RotateActionMsg>;
 
 // AdjustDirection 
-using AdjustPositionMsg = aruco_marker_detector_msgs::action::AdjustPosition;
-using GoalHandleAdjustPosition= rclcpp_action::ClientGoalHandle<AdjustPositionMsg>;
-
-// AdjustPosition
 using AdjustDirectionMsg = aruco_marker_detector_msgs::action::AdjustDirection;
 using GoalHandleAdjustDirection = rclcpp_action::ClientGoalHandle<AdjustDirectionMsg>;
+
+// AdjustPosition
+using AdjustPositionMsg = aruco_marker_detector_msgs::action::AdjustPosition;
+using GoalHandleAdjustPosition= rclcpp_action::ClientGoalHandle<AdjustPositionMsg>;
 
 // ApproachMarker
 using ApproachMarkerMsg = ActionManagerMsg;
@@ -80,6 +80,10 @@ class ActionManager : public rclcpp::Node
 		// AdjustPosition Client
 		rclcpp_action::Client<AdjustPositionMsg>::SendGoalOptions adjust_position_goal_options_;
 		rclcpp_action::Client<AdjustPositionMsg>::SharedPtr adjust_position_client_;
+
+		// ApproachMarker Client
+		rclcpp_action::Client<ApproachMarkerMsg>::SendGoalOptions approach_marker_goal_options_;
+		rclcpp_action::Client<ApproachMarkerMsg>::SharedPtr approach_marker_client_;
 
 		bool wait_result_;
 		double marker_x_, marker_y_, marker_t_;
