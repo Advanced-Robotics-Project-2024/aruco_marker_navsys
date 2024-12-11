@@ -103,6 +103,7 @@ namespace ArucoMarkerNavigation{
 		
 		msg.angular.z = 0.;
 		cmd_vel_pub_->publish(msg);
+		goal_handle->succeed(result);
 		RCLCPP_INFO(this->get_logger(), "Find ID(%d)", goal_id);
 	}
 

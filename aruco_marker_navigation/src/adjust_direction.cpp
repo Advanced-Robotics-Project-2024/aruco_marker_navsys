@@ -7,6 +7,10 @@
 #include <nav_msgs/msg/odometry.hpp>
 
 #include<tf2_ros/create_timer_ros.h>
+#include<tf2/convert.h>
+#include<tf2/utils.h>
+#include<tf2/LinearMath/Quaternion.h>
+#include<tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include <algorithm>
 
@@ -26,6 +30,8 @@ namespace ArucoMarkerNavigation{
 		this->get_parameter("max_angular_vel", max_angular_vel_);
 		this->declare_parameter("loop_rate", 20);
 		this->get_parameter("loop_rate", loop_rate_);
+		this->declare_parameter("torelance_error", 0.1);
+		this->get_parameter("torelance_error", torelance_error_);
 	}
 
 	void AdjustDirection::initAction()
@@ -86,11 +92,19 @@ namespace ArucoMarkerNavigation{
 		double goal_rotate_direction = goal_handle->get_goal()->goal_rotate_direction;
 		geometry_msgs::msg::Twist msg;
 		nav_msgs::msg::Odometry last_odom;
-		//while(std::find(ids_.begin(), ids_.end(), goal_id) == ids_.end()){
-		//	msg.angular.z = max_angular_vel_;
-		//	cmd_vel_pub_->publish(msg);
-		//	loop_rate->sleep():
-		//}
+		double goal_robot_direction = tf2::getYaw(odom_.pose.pose.orientation) + goal_rotate_direction;
+		while(goal_robot_direction > M_PI) goal_robot_direction -= 2*M_PI;
+		while(goal_robot_direction < -M_PI) goal_robot_direction += 2*M_PI;
+		RCLCPP_INFO(this->get_logger(), "Goal Robot Direction: %lf", goal_robot_direction);
+		while(abs(goal_robot_direction - tf2::getYaw(odom_.pose.pose.orientation)) > torelance_error_){
+			if(goal_robot_direction - tf2::getYaw(odom_.pose.pose.orientation) > 0){
+				msg.angular.z = max_angular_vel_;
+			}else{
+				msg.angular.z = -max_angular_vel_;
+			}
+			cmd_vel_pub_->publish(msg);
+			loop_rate.sleep();
+		}
 		msg.angular.z = 0.;
 		cmd_vel_pub_->publish(msg);
 		RCLCPP_INFO(this->get_logger(), "Completed Rotate For Adjust(%lf)", goal_rotate_direction);
@@ -105,7 +119,8 @@ namespace ArucoMarkerNavigation{
 
 	void AdjustDirection::odomCb(nav_msgs::msg::Odometry::ConstSharedPtr msg)
 	{
-		RCLCPP_INFO(this->get_logger(), "Received Odometry");
+		//RCLCPP_INFO(this->get_logger(), "Received Odometry");
+		odom_ = *msg;
 	}
 }
 

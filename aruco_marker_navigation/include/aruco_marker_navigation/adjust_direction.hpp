@@ -55,6 +55,8 @@ class AdjustDirection : public rclcpp::Node
 		bool init_tf_;
 		int loop_rate_;
 		std::vector<int> ids_;
+		nav_msgs::msg::Odometry odom_;
+		double torelance_error_;
 
 		std::shared_ptr<tf2_ros::Buffer> tf_;
     	std::shared_ptr<tf2_ros::TransformListener> tfl_;
