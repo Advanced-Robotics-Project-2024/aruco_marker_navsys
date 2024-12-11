@@ -151,7 +151,7 @@ namespace ArucoMarkerNavigation{
 
 		//Send Goal to AdjustPosition
 		AdjustPositionMsg::Goal adjust_position_goal_msg;
-		adjust_position_goal_msg.movement_length = marker_y_;
+		adjust_position_goal_msg.movement_length = -marker_y_;
 		while(!this->adjust_position_client_->wait_for_action_server()){
 			RCLCPP_INFO(get_logger(), "Waiting for action server...");
 		}
