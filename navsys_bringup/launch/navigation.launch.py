@@ -18,14 +18,20 @@ def generate_launch_description():
                     executable='aruco_marker_info_pub',
                     name='aruco_marker_info_pub'), 
                 Node(
-                    package='aruco_marker_localization', 
-                    executable='aruco_marker_localization', 
-                    name='aruco_marker_localization',
-                    parameters=[params_file]),
+                    package='aruco_marker_navigation', 
+                    executable='rotate_action', 
+                    name='rotate_action',
+                    parameters=[{'max_angular_vel': 0.3}]),
                 Node(
                     package='aruco_marker_navigation', 
-                    executable='toward_marker', 
-                    name='toward_marker')
+                    executable='adjust_direction', 
+                    name='adjust_direction', 
+                    parameters=[{'max_angular_vel': 0.3}]),
+                Node(
+                    package='aruco_marker_navigation', 
+                    executable='adjust_position', 
+                    name='adjust_position', 
+                    parameters=[{'max_linear_vel': 0.22}])
             ]
     )
 

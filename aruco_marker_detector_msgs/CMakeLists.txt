@@ -28,6 +28,7 @@ endif()
 set(action_files
 	"action/TowardMarker.action"
 	"action/AdjustDirection.action"
+	"action/AdjustPosition.action"
 	"action/RotateAction.action"
 )
 

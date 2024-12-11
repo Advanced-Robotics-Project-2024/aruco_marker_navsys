@@ -1,0 +1,5 @@
+float32 movement_length # euclide 
+---
+bool success 
+---
+float32 residual

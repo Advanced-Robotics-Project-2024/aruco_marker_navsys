@@ -36,6 +36,10 @@ ament_auto_add_executable(adjust_direction
 	src/adjust_direction.cpp
 )
 
+ament_auto_add_executable(adjust_position
+	src/adjust_position.cpp
+)
+
 ament_auto_package(
 	INSTALL_TO_SHARE
 	config

@@ -15,7 +15,7 @@
 #include <algorithm>
 
 namespace ArucoMarkerNavigation{
-	AdjustDirection::AdjustDirection() : Node("rotate_action")
+	AdjustDirection::AdjustDirection() : Node("adjust_direction")
 	{
 		initParam();
 		initPubSub();
