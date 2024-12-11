@@ -40,6 +40,10 @@ ament_auto_add_executable(adjust_position
 	src/adjust_position.cpp
 )
 
+ament_auto_add_executable(approach_marker
+	src/approach_marker.cpp
+)
+
 ament_auto_package(
 	INSTALL_TO_SHARE
 	config

@@ -84,7 +84,6 @@ namespace ArucoMarkerNavigation{
 		}
 		int goal_id = goal_handle->get_goal()->goal_id;
 		geometry_msgs::msg::Twist msg;
-		int goal_id_index;
 		auto feedback = std::make_shared<RotateActionMsg::Feedback>();
 		auto result = std::make_shared<RotateActionMsg::Result>();
 		while(std::find(ids_.begin(), ids_.end(), goal_id) == ids_.end()){

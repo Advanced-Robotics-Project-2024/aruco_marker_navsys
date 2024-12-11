@@ -30,6 +30,7 @@ set(action_files
 	"action/AdjustDirection.action"
 	"action/AdjustPosition.action"
 	"action/RotateAction.action"
+	"action/ApproachMarker.action"
 )
 
 set(msg_files
