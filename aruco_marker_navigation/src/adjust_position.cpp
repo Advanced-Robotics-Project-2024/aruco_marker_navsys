@@ -88,6 +88,7 @@ namespace ArucoMarkerNavigation{
 		if(!init_tf_){
 			initTf();
 			init_tf_ = true;
+			RCLCPP_INFO(this->get_logger(), "Initialized TF");
 		}
 		double goal_movement_length = goal_handle->get_goal()->movement_length;
 		geometry_msgs::msg::Twist msg;
@@ -97,7 +98,6 @@ namespace ArucoMarkerNavigation{
 		bool init_odom = false;
 		//while(goal_robot_direction > M_PI) goal_robot_direction -= 2*M_PI;
 		//while(goal_robot_direction < -M_PI) goal_robot_direction += 2*M_PI;
-		RCLCPP_INFO(this->get_logger(), "Goal Movement Length: %lf", goal_movement_length);
 		while(abs(goal_movement_length - movement_length) > torelance_error_){
 			if(!init_odom){
 				last_odom = odom_;
@@ -105,15 +105,19 @@ namespace ArucoMarkerNavigation{
 			}else{
 				double dx = odom_.pose.pose.position.x - last_odom.pose.pose.position.x;
 				double dy = odom_.pose.pose.position.y - last_odom.pose.pose.position.y;
-				movement_length += hypot(dy, dx);
 				RCLCPP_INFO(this->get_logger(), "Movement Length: %lf", movement_length);
 				if(goal_movement_length - movement_length > 0.){
 					msg.linear.x = max_linear_vel_;
+					RCLCPP_INFO(this->get_logger(), "Foward");
+					movement_length += hypot(dy, dx);
 				}else{
 					msg.linear.x = -max_linear_vel_;
+					RCLCPP_INFO(this->get_logger(), "Back");
+					movement_length -= hypot(dy, dx);
 				}
 				cmd_vel_pub_->publish(msg);
 				last_odom = odom_;
+				RCLCPP_INFO(this->get_logger(), "Goal Movement Length: %lf", goal_movement_length);
 			}
 			loop_rate.sleep();
 		}
