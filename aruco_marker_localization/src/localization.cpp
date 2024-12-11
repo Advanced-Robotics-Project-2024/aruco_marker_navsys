@@ -156,6 +156,7 @@ namespace ArucoMarkerLocalization{
 	bool Localization::motionUpdate()
 	{
 		Pose d = last_odom_ - prev_odom_;
+		d.angleNomalization();
 		double delta_trans = sqrt(d.x_*d.x_ + d.y_*d.y_);
 		double delta_rot1 = atan2(d.y_, d.x_) - prev_odom_.t_;
 		double delta_rot2 = d.t_ - delta_rot1;
@@ -167,7 +168,9 @@ namespace ArucoMarkerLocalization{
 		}
 		//RCLCPP_INFO(this->get_logger(), "dt: %lf", ep_.x);
 		ep_.t_ += d.t_;
+		ep_.angleNomalization();
 		prev_odom_ = last_odom_;
+
 		return true;
 	}
 

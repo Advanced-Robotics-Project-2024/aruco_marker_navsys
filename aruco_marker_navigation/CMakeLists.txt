@@ -28,6 +28,14 @@ ament_auto_add_executable(toward_marker
 	src/toward_marker.cpp
 )
 
+ament_auto_add_executable(rotate_action
+	src/rotate_action.cpp
+)
+
+ament_auto_add_executable(adjust_direction
+	src/adjust_direction.cpp
+)
+
 ament_auto_package(
 	INSTALL_TO_SHARE
 	config

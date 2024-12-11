@@ -1,0 +1,5 @@
+float32 goal_rotate_direction
+---
+bool success
+---
+float32 residual

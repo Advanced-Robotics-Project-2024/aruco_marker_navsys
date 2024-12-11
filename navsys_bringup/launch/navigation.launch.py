@@ -21,7 +21,11 @@ def generate_launch_description():
                     package='aruco_marker_localization', 
                     executable='aruco_marker_localization', 
                     name='aruco_marker_localization',
-                    parameters=[params_file])
+                    parameters=[params_file]),
+                Node(
+                    package='aruco_marker_navigation', 
+                    executable='toward_marker', 
+                    name='toward_marker')
             ]
     )
 

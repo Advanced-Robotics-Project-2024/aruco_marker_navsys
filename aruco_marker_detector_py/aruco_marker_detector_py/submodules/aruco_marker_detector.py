@@ -22,10 +22,12 @@ class ArucoMarkerDetector():
         #self.marker_length = 0.085 # actual
         self.marker_length = 0.1 # simulator
         pkg_dir = get_package_share_directory('aruco_marker_detector_py')
-        #self.mtx = np.load(os.path.join(pkg_dir, 'mtx.npy'))
-        #self.dist = np.load(os.path.join(pkg_dir, 'dist.npy'))
-        self.mtx = np.load(os.path.join(pkg_dir, 'mtx_sim.npy'))
-        self.dist = np.load(os.path.join(pkg_dir, 'dist_sim.npy'))
+        self.mtx = np.load(os.path.join(pkg_dir, 'mtx.npy'))
+        self.dist = np.load(os.path.join(pkg_dir, 'dist.npy'))
+        #self.mtx = np.load(os.path.join(pkg_dir, 'mtx_sim.npy'))
+        #self.dist = np.load(os.path.join(pkg_dir, 'dist_sim.npy'))
+        print(f'mtx = {self.mtx}')
+        print(f'dist = {self.dist}')
 
     def detect_marker(self, frame):
         gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
