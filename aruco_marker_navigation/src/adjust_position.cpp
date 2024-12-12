@@ -107,11 +107,11 @@ namespace ArucoMarkerNavigation{
 				double dy = odom_.pose.pose.position.y - last_odom.pose.pose.position.y;
 				RCLCPP_INFO(this->get_logger(), "Movement Length: %lf", movement_length);
 				if(goal_movement_length - movement_length > 0.){
-					msg.linear.x = max_linear_vel_;
+					msg.linear.x = -max_linear_vel_;
 					RCLCPP_INFO(this->get_logger(), "Foward");
 					movement_length += hypot(dy, dx);
 				}else{
-					msg.linear.x = -max_linear_vel_;
+					msg.linear.x = max_linear_vel_;
 					RCLCPP_INFO(this->get_logger(), "Back");
 					movement_length -= hypot(dy, dx);
 				}

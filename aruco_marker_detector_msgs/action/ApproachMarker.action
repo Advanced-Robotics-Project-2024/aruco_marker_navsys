@@ -2,5 +2,9 @@ float32 goal_length # euclide
 int32 goal_id
 ---
 bool success 
+int32 id
+float32 ex
+float32 ey
+float32 et
 ---
 float32 residual

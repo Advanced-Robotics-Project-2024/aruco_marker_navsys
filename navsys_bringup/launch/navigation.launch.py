@@ -36,7 +36,12 @@ def generate_launch_description():
                     package='aruco_marker_navigation', 
                     executable='approach_marker', 
                     name='approach_marker', 
-                    parameters=[{'max_linear_vel': 0.2}]),
+                    parameters=[{'max_linear_vel': 0.2, 
+                                 'max_angular_vel': 0.3, 
+                                 'kp_x': 5.0, 
+                                 'kp_t': 5.0, 
+                                 'torelance_length_error': 0.05, 
+                                 'torelance_angle_error': 0.05}]),
                 Node(
                     package='aruco_marker_navigation', 
                     executable='action_manager', 

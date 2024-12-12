@@ -110,6 +110,8 @@ namespace ArucoMarkerNavigation{
 		approach_marker_goal_options_.result_callback = 
 			[this]([[maybe_unused]] const GoalHandleApproachMarker::WrappedResult & result){
 				wait_result_ = false;
+				succeed_ = result.result->success;
+				RCLCPP_INFO(this->get_logger(), "success: %d", succeed_);
 			};
 	}
 
@@ -143,58 +145,59 @@ namespace ArucoMarkerNavigation{
 		int goal_id = goal_handle->get_goal()->goal_id;
 		double goal_length = goal_handle->get_goal()->goal_length;
 		RCLCPP_INFO(this->get_logger(), "Recieved Navigation Request to Marker(%d)", goal_id);
+		while(!succeed_){
+			// Send Goal to RoateAction
+			RotateActionMsg::Goal rotate_action_goal_msg;
+			rotate_action_goal_msg.goal_id = goal_id;
+			while(!this->rotate_action_client_->wait_for_action_server()){
+				RCLCPP_INFO(get_logger(), "Waiting for action server...");
+			}
+			wait_result_ = true;
+			rotate_action_client_->async_send_goal(rotate_action_goal_msg, rotate_action_goal_options_);
+			waitResult();
+			AdjustDirectionMsg::Goal goal_msg;
 
-		// Send Goal to RoateAction
-		RotateActionMsg::Goal rotate_action_goal_msg;
-		rotate_action_goal_msg.goal_id = goal_id;
-		while(!this->rotate_action_client_->wait_for_action_server()){
-			RCLCPP_INFO(get_logger(), "Waiting for action server...");
+			//Send Goal to AdjustDirection
+			AdjustDirectionMsg::Goal adjust_direction_goal_msg;
+			adjust_direction_goal_msg.goal_rotate_direction = M_PI / 2 - marker_t_;
+			while(!this->adjust_direction_client_->wait_for_action_server()){
+				RCLCPP_INFO(get_logger(), "Waiting for action server...");
+			}
+			wait_result_ = true;
+			adjust_direction_client_->async_send_goal(adjust_direction_goal_msg, adjust_direction_goal_options_);
+			waitResult();
+
+			//Send Goal to AdjustPosition
+			AdjustPositionMsg::Goal adjust_position_goal_msg;
+			adjust_position_goal_msg.movement_length = -marker_y_;
+			while(!this->adjust_position_client_->wait_for_action_server()){
+				RCLCPP_INFO(get_logger(), "Waiting for action server...");
+			}
+			wait_result_ = true;
+			adjust_position_client_->async_send_goal(adjust_position_goal_msg, adjust_position_goal_options_);
+			waitResult();
+
+			//Send Goal to AdjustDirection
+			adjust_direction_goal_msg.goal_rotate_direction = -M_PI / 2;
+			while(!this->adjust_direction_client_->wait_for_action_server()){
+				RCLCPP_INFO(get_logger(), "Waiting for action server...");
+			}
+			wait_result_ = true;
+			adjust_direction_client_->async_send_goal(adjust_direction_goal_msg, adjust_direction_goal_options_);
+			waitResult();
+
+			//Send Goal to ApproachMarkrer 
+			ApproachMarkerMsg::Goal approach_marker_goal_msg;
+			approach_marker_goal_msg.goal_id = goal_id;
+			approach_marker_goal_msg.goal_length = goal_length;
+			while(!this->approach_marker_client_->wait_for_action_server()){
+				RCLCPP_INFO(get_logger(), "Waiting for action server...");
+			}
+			wait_result_ = true;
+			approach_marker_client_->async_send_goal(approach_marker_goal_msg, approach_marker_goal_options_);
+			waitResult();
 		}
-		wait_result_ = true;
-		rotate_action_client_->async_send_goal(rotate_action_goal_msg, rotate_action_goal_options_);
-		waitResult();
-		AdjustDirectionMsg::Goal goal_msg;
-
-		//Send Goal to AdjustDirection
-		AdjustDirectionMsg::Goal adjust_direction_goal_msg;
-		adjust_direction_goal_msg.goal_rotate_direction = M_PI / 2 - marker_t_;
-		while(!this->adjust_direction_client_->wait_for_action_server()){
-			RCLCPP_INFO(get_logger(), "Waiting for action server...");
-		}
-		wait_result_ = true;
-		adjust_direction_client_->async_send_goal(adjust_direction_goal_msg, adjust_direction_goal_options_);
-		waitResult();
-
-		//Send Goal to AdjustPosition
-		AdjustPositionMsg::Goal adjust_position_goal_msg;
-		adjust_position_goal_msg.movement_length = -marker_y_;
-		while(!this->adjust_position_client_->wait_for_action_server()){
-			RCLCPP_INFO(get_logger(), "Waiting for action server...");
-		}
-		wait_result_ = true;
-		adjust_position_client_->async_send_goal(adjust_position_goal_msg, adjust_position_goal_options_);
-		waitResult();
-
-		//Send Goal to AdjustDirection
-		adjust_direction_goal_msg.goal_rotate_direction = -M_PI / 2;
-		while(!this->adjust_direction_client_->wait_for_action_server()){
-			RCLCPP_INFO(get_logger(), "Waiting for action server...");
-		}
-		wait_result_ = true;
-		adjust_direction_client_->async_send_goal(adjust_direction_goal_msg, adjust_direction_goal_options_);
-		waitResult();
-
-		//Send Goal to ApproachMarkrer 
-		ApproachMarkerMsg::Goal approach_marker_goal_msg;
-		approach_marker_goal_msg.goal_id = goal_id;
-		approach_marker_goal_msg.goal_length = goal_length;
-		while(!this->approach_marker_client_->wait_for_action_server()){
-			RCLCPP_INFO(get_logger(), "Waiting for action server...");
-		}
-		wait_result_ = true;
-		approach_marker_client_->async_send_goal(approach_marker_goal_msg, approach_marker_goal_options_);
-		waitResult();
-
+		succeed_ = false;
 		RCLCPP_INFO(this->get_logger(), "Completed Navigation to Marker(%lf)", goal_length);
 	}
 

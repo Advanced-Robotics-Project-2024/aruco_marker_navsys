@@ -67,7 +67,6 @@ class ActionManager : public rclcpp::Node
 	
 	private:
 		rclcpp_action::Server<ActionManagerMsg>::SharedPtr rotate_action_srv_;
-		int loop_rate_;
 
 		// RotateAction Client
 		rclcpp_action::Client<RotateActionMsg>::SendGoalOptions rotate_action_goal_options_;
@@ -85,8 +84,10 @@ class ActionManager : public rclcpp::Node
 		rclcpp_action::Client<ApproachMarkerMsg>::SendGoalOptions approach_marker_goal_options_;
 		rclcpp_action::Client<ApproachMarkerMsg>::SharedPtr approach_marker_client_;
 
+		int loop_rate_;
 		bool wait_result_;
 		double marker_x_, marker_y_, marker_t_;
+		bool succeed_;
 };
 }
 

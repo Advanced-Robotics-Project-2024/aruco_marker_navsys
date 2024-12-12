@@ -36,6 +36,12 @@ namespace ArucoMarkerNavigation{
 		this->get_parameter("torelance_angle_error", torelance_angle_error_);
 		this->declare_parameter("torelance_length_error", 0.1);
 		this->get_parameter("torelance_length_error", torelance_length_error_);
+		this->declare_parameter("kp_x", 10.);
+		this->get_parameter("kp_x", kp_x_);
+		this->declare_parameter("kp_t", 10.);
+		this->get_parameter("kp_t", kp_t_);
+		this->declare_parameter("torelance_lost_time", 5);
+		this->get_parameter("torelance_lost_time", torelance_lost_time_);
 	}
 
 	void ApproachMarker::initAction()
@@ -45,19 +51,6 @@ namespace ArucoMarkerNavigation{
         	std::bind(&ApproachMarker::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
         	std::bind(&ApproachMarker::handle_cancel, this, std::placeholders::_1),
         	std::bind(&ApproachMarker::handle_accepted, this, std::placeholders::_1));
-	}
-
-	void ApproachMarker::initTf()
-	{
-		tf_.reset();
-		tfl_.reset();
-
-		tf_ = std::make_shared<tf2_ros::Buffer>(get_clock());
-        auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
-          get_node_base_interface(), get_node_timers_interface(),
-          create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive, false));
-        tf_->setCreateTimerInterface(timer_interface);
-        tfl_ = std::make_shared<tf2_ros::TransformListener>(*tf_);
 	}
 
 	rclcpp_action::GoalResponse ApproachMarker::handle_goal(
@@ -89,42 +82,74 @@ namespace ArucoMarkerNavigation{
 	{
 		RCLCPP_INFO(this->get_logger(), "Rotate Action: Received request");
 		rclcpp::Rate loop_rate(loop_rate_);
-		if(!init_tf_){
-			initTf();
-			init_tf_ = true;
-			RCLCPP_INFO(this->get_logger(), "Initialized TF");
-		}
 		double goal_movement_length = goal_handle->get_goal()->goal_length;
-		double goal_id = goal_handle->get_goal()->goal_id;
+		int goal_id = goal_handle->get_goal()->goal_id;
 		geometry_msgs::msg::Twist msg;
-		nav_msgs::msg::Odometry last_odom;
-		double current_distance;
-		// double current_diff_direction;
-		//while(goal_robot_direction > M_PI) goal_robot_direction -= 2*M_PI;
-		//while(goal_robot_direction < -M_PI) goal_robot_direction += 2*M_PI;
+		double error_x = torelance_length_error_ * 10.;
+		double error_t = torelance_angle_error_ * 10.;
+		auto result = std::make_shared<ApproachMarkerMsg::Result>();
+		bool lost_marker = false;
+		std::chrono::system_clock::time_point lost_marker_time;
 		do{
 			auto it = std::find(ids_.begin(), ids_.end(), goal_id);
-			size_t index = distance(ids_.begin(), it);
-			current_distance = xs_[index];
-			if(current_distance - goal_movement_length > 0.){
-				msg.linear.x = max_linear_vel_;
+			if(it == ids_.end()){
+				if(!lost_marker){
+					lost_marker = true;
+					lost_marker_time = std::chrono::system_clock::now();
+				}
+				int64_t time_diff = std::chrono::duration_cast<std::chrono::seconds >(
+						std::chrono::system_clock::now() - lost_marker_time).count();
+				if(time_diff > torelance_lost_time_){
+					result->success = false;
+					goal_handle->abort(result);
+					pubCmdVel(0., 0.);
+					return;
+				}
+				RCLCPP_INFO(this->get_logger(), "NotFound: %d", goal_id);
+				pubCmdVel(-max_linear_vel_/2, 0.);
 			}else{
-				msg.linear.x = -max_linear_vel_;
+				if(lost_marker) lost_marker = false;
+				size_t index = distance(ids_.begin(), it);
+				error_x = xs_[index] - goal_movement_length;
+				error_t = 0. - ts_[index];
+				pubCmdVel(kp_x_*error_x, kp_t_*error_t);
+				result->ex = xs_[index] - goal_movement_length;
+				result->ey = ys_[index];
+				result->et = ts_[index];
 			}
-			//current_diff_direction = ts_[index];
-			//if(current_diff_direction > 0.){
-			//	msg.angular.z = -max_angular_vel_;
-			//}else{
-			//	msg.angular.z = max_angular_vel_;
-			//}
-			cmd_vel_pub_->publish(msg);
 			loop_rate.sleep();
-		//}while(current_distance - goal_movement_length > torelance_length_error_ || current_diff_direction > torelance_angle_error_); 
-		}while(abs(current_distance - goal_movement_length) > torelance_length_error_); 
-		msg.linear.x = 0.;
-		msg.angular.z = 0.;
+		}while(abs(error_x) > torelance_length_error_ || abs(error_t) > torelance_angle_error_); 
+		pubCmdVel(0., 0.);
+		result->id = goal_id;
+		if(abs(result->ex) <= torelance_length_error_ && 
+		   abs(result->ey) <= torelance_length_error_ && 
+		   abs(result->et) <= torelance_angle_error_){
+			result->success = true;
+		}else{
+			result->success = false;
+		}
+		goal_handle->succeed(result);
+		RCLCPP_INFO(this->get_logger(), "Completed Approach Marker(%d)", goal_id);
+	}
+
+	void ApproachMarker::pubCmdVel(double linear_vel, double ang_vel)
+	{
+		geometry_msgs::msg::Twist msg;
+		if(linear_vel > max_linear_vel_){
+			msg.linear.x = max_linear_vel_;
+		}else if(linear_vel < -max_linear_vel_){
+			msg.linear.x = -max_linear_vel_;
+		}else{
+			msg.linear.x = linear_vel;
+		}
+		if(ang_vel > max_angular_vel_){
+			msg.angular.z = max_angular_vel_;
+		}else if(ang_vel < -max_angular_vel_){
+			msg.angular.z = -max_angular_vel_;
+		}else{
+			msg.angular.z = ang_vel;
+		}
 		cmd_vel_pub_->publish(msg);
-		RCLCPP_INFO(this->get_logger(), "Completed Approach Marker(%lf)", goal_id);
 	}
 
 	void ApproachMarker::initPubSub()
