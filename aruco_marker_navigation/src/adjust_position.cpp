@@ -36,7 +36,7 @@ namespace ArucoMarkerNavigation{
 
 	void AdjustPosition::initAction()
 	{
-		rotate_action_srv_ = rclcpp_action::create_server<AdjustPositionMsg>(
+		adjust_position_srv_ = rclcpp_action::create_server<AdjustPositionMsg>(
         	this, "adjust_position",
         	std::bind(&AdjustPosition::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
         	std::bind(&AdjustPosition::handle_cancel, this, std::placeholders::_1),

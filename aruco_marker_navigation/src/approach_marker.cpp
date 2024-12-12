@@ -40,7 +40,7 @@ namespace ArucoMarkerNavigation{
 
 	void ApproachMarker::initAction()
 	{
-		rotate_action_srv_ = rclcpp_action::create_server<ApproachMarkerMsg>(
+		approach_marker_srv_ = rclcpp_action::create_server<ApproachMarkerMsg>(
         	this, "approach_marker",
         	std::bind(&ApproachMarker::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
         	std::bind(&ApproachMarker::handle_cancel, this, std::placeholders::_1),
@@ -98,9 +98,8 @@ namespace ArucoMarkerNavigation{
 		double goal_id = goal_handle->get_goal()->goal_id;
 		geometry_msgs::msg::Twist msg;
 		nav_msgs::msg::Odometry last_odom;
-		bool init_odom = false;
 		double current_distance;
-		double current_diff_direction;
+		// double current_diff_direction;
 		//while(goal_robot_direction > M_PI) goal_robot_direction -= 2*M_PI;
 		//while(goal_robot_direction < -M_PI) goal_robot_direction += 2*M_PI;
 		do{
@@ -122,27 +121,6 @@ namespace ArucoMarkerNavigation{
 			loop_rate.sleep();
 		//}while(current_distance - goal_movement_length > torelance_length_error_ || current_diff_direction > torelance_angle_error_); 
 		}while(abs(current_distance - goal_movement_length) > torelance_length_error_); 
-	//		if(!init_odom){
-	//			last_odom = odom_;
-	//			init_odom = true;
-	//		}else{
-	//			double dx = odom_.pose.pose.position.x - last_odom.pose.pose.position.x;
-	//			double dy = odom_.pose.pose.position.y - last_odom.pose.pose.position.y;
-	//			RCLCPP_INFO(this->get_logger(), "Movement Length: %lf", movement_length);
-	//			if(goal_movement_length - movement_length > 0.){
-	//				msg.linear.x = max_linear_vel_;
-	//				RCLCPP_INFO(this->get_logger(), "Foward");
-	//				movement_length += hypot(dy, dx);
-	//			}else{
-	//				msg.linear.x = -max_linear_vel_;
-	//				RCLCPP_INFO(this->get_logger(), "Back");
-	//				movement_length -= hypot(dy, dx);
-	//			}
-	//			last_odom = odom_;
-	//			RCLCPP_INFO(this->get_logger(), "Goal Movement Length: %lf", goal_movement_length);
-	//		}
-	//		loop_rate.sleep();
-	//	}
 		msg.linear.x = 0.;
 		msg.angular.z = 0.;
 		cmd_vel_pub_->publish(msg);

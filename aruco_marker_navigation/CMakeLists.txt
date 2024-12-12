@@ -24,10 +24,6 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_auto_add_executable(toward_marker
-	src/toward_marker.cpp
-)
-
 ament_auto_add_executable(rotate_action
 	src/rotate_action.cpp
 )

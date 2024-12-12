@@ -49,7 +49,7 @@ class AdjustDirection : public rclcpp::Node
 	private:
 		rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
 		rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
-		rclcpp_action::Server<AdjustDirectionMsg>::SharedPtr rotate_action_srv_;
+		rclcpp_action::Server<AdjustDirectionMsg>::SharedPtr adjust_direction_srv_;
 
 		double max_angular_vel_;
 		bool init_tf_;

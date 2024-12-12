@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2024 MakotoYoshigoe
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ARUCOMARKERNAVIGATION__ADJUSTPOSITION_HPP_
-#define ARUCOMARKERNAVIGATION__ADJUSTPOSITION_HPP_
+#ifndef ARUCOMARKERNAVIGATION__ACTIONMANAGER_HPP_
+#define ARUCOMARKERNAVIGATION__ACTIONMANAGER_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
@@ -90,4 +90,4 @@ class ActionManager : public rclcpp::Node
 };
 }
 
-#endif // ARUCOMARKERNAVIGATION__ADJUSTDIRECTION_HPP_
+#endif // ARUCOMARKERNAVIGATION__ACTIONMANAGER_HPP_

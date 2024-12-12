@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2024 MakotoYoshigoe
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ARUCOMARKERNAVIGATION__ADJUSTPOSITION_HPP_
-#define ARUCOMARKERNAVIGATION__ADJUSTPOSITION_HPP_
+#ifndef ARUCOMARKERNAVIGATION__APPROACHMARKER_HPP_
+#define ARUCOMARKERNAVIGATION__APPROACHMARKER_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
@@ -52,7 +52,7 @@ class ApproachMarker : public rclcpp::Node
 		rclcpp::Subscription<aruco_marker_detector_msgs::msg::MarkerInfos>::SharedPtr marker_infos_sub_;
 		rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
 		rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
-		rclcpp_action::Server<ApproachMarkerMsg>::SharedPtr rotate_action_srv_;
+		rclcpp_action::Server<ApproachMarkerMsg>::SharedPtr approach_marker_srv_;
 
 		double max_linear_vel_;
 		double max_angular_vel_;
@@ -69,4 +69,4 @@ class ApproachMarker : public rclcpp::Node
 };
 }
 
-#endif // ARUCOMARKERNAVIGATION__ADJUSTDIRECTION_HPP_
+#endif // ARUCOMARKERNAVIGATION__APPROACHMARKER_HPP_
