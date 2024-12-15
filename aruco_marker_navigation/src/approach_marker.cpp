@@ -42,6 +42,8 @@ namespace ArucoMarkerNavigation{
 		this->get_parameter("kp_t", kp_t_);
 		this->declare_parameter("torelance_lost_time", 5);
 		this->get_parameter("torelance_lost_time", torelance_lost_time_);
+		this->declare_parameter("torelance_lost_count", 5);
+		this->get_parameter("torelance_lost_count", torelance_lost_count_);
 	}
 
 	void ApproachMarker::initAction()
@@ -86,20 +88,23 @@ namespace ArucoMarkerNavigation{
 		int goal_id = goal_handle->get_goal()->goal_id;
 		geometry_msgs::msg::Twist msg;
 		double error_x = torelance_length_error_ * 10.;
+		double error_y = error_x;
 		double error_t = torelance_angle_error_ * 10.;
 		auto result = std::make_shared<ApproachMarkerMsg::Result>();
 		bool lost_marker = false;
+		int16_t lost_times = 0;
 		std::chrono::system_clock::time_point lost_marker_time;
 		do{
 			auto it = std::find(ids_.begin(), ids_.end(), goal_id);
 			if(it == ids_.end()){
 				if(!lost_marker){
+					lost_times ++;
 					lost_marker = true;
 					lost_marker_time = std::chrono::system_clock::now();
 				}
 				int64_t time_diff = std::chrono::duration_cast<std::chrono::seconds >(
 						std::chrono::system_clock::now() - lost_marker_time).count();
-				if(time_diff > torelance_lost_time_){
+				if(time_diff > torelance_lost_time_ || lost_times > torelance_lost_count_){
 					result->success = false;
 					goal_handle->abort(result);
 					pubCmdVel(0., 0.);
@@ -111,8 +116,12 @@ namespace ArucoMarkerNavigation{
 				if(lost_marker) lost_marker = false;
 				size_t index = distance(ids_.begin(), it);
 				error_x = xs_[index] - goal_movement_length;
+				error_y = ys_[index];
 				error_t = 0. - ts_[index];
-				pubCmdVel(kp_x_*error_x, kp_t_*error_t);
+				double ang_vel_y = kp_t_*error_y, ang_vel_t = kp_t_*error_t;
+				//if(abs(ang_vel_y) > abs(ang_vel_t)) pubCmdVel(kp_x_*error_x, ang_vel_y);
+				//else pubCmdVel(kp_x_*error_x, ang_vel_t);
+				pubCmdVel(kp_x_*error_x, ang_vel_t);
 				result->ex = xs_[index] - goal_movement_length;
 				result->ey = ys_[index];
 				result->et = ts_[index];

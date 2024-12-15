@@ -25,8 +25,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'aruco_marker_info_pub = aruco_marker_detector_py.aruco_marker_info_pub:main'
-
+            'aruco_marker_info_pub = aruco_marker_detector_py.aruco_marker_info_pub:main', 
+            'approach_marker_client = aruco_marker_detector_py.test_action_client:main'
         ],
     },
 )

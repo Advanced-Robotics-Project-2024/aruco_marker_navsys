@@ -66,6 +66,7 @@ class ApproachMarker : public rclcpp::Node
 		double torelance_angle_error_;
 		double kp_x_, kp_t_;
 		int torelance_lost_time_;
+		int torelance_lost_count_;
 
 		std::shared_ptr<tf2_ros::Buffer> tf_;
     	std::shared_ptr<tf2_ros::TransformListener> tfl_;
