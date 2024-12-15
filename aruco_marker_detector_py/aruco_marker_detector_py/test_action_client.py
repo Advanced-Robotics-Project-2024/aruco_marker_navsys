@@ -14,7 +14,21 @@ class ActionManagerClient(Node):
         msg.goal_length = 0.5
         
         self.client.wait_for_server()
-        self.client.send_goal_async(msg)
+        self.send_goal_future = self.client.send_goal_async(msg)
+        self._send_goal_future.add_done_callback(self.goal_response_callback)
+
+    def goal_response_callback(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted:
+            self.get_logger().info('Goal rejected :(')
+            return
+
+        self.get_logger().info('Goal accepted :)')
+
+        self._get_result_future = goal_handle.get_result_async()
+        self._get_result_future.add_done_callback(self.get_result_callback)
+
+
 
 def main(args=None):
     rclpy.init(args=args)

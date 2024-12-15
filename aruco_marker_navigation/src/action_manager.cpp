@@ -13,6 +13,7 @@
 #include<tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include <algorithm>
+#include <chrono>
 
 namespace ArucoMarkerNavigation{
 	ActionManager::ActionManager() : Node("approach_marker")
@@ -198,6 +199,17 @@ namespace ArucoMarkerNavigation{
 			waitResult();
 		}
 		succeed_ = false;
+		waitReload();
+		AdjustDirectionMsg::Goal adjust_direction_goal_msg;
+
+	    adjust_direction_goal_msg.goal_rotate_direction = -M_PI / 2;
+		while(!this->adjust_direction_client_->wait_for_action_server()){
+			RCLCPP_INFO(get_logger(), "Waiting for action server...");
+		}
+		wait_result_ = true;
+		adjust_direction_client_->async_send_goal(adjust_direction_goal_msg, adjust_direction_goal_options_);
+		waitResult();
+
 		RCLCPP_INFO(this->get_logger(), "Completed Navigation to Marker(%lf)", goal_length);
 	}
 
@@ -211,6 +223,14 @@ namespace ArucoMarkerNavigation{
 		while(wait_result_){
 			loop_rate.sleep();
 		}
+	}
+	
+	void ActionManager::waitReload()
+	{
+		  using namespace std::chrono_literals;
+		  RCLCPP_INFO(this->get_logger(), "Waiting for Reload");
+		  rclcpp::sleep_for(15000ms);
+		  RCLCPP_INFO(this->get_logger(), "Finished Waiting for Reload");
 	}
 }
 

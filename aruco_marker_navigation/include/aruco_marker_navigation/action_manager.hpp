@@ -48,6 +48,7 @@ class ActionManager : public rclcpp::Node
 		void initActionServer();
 		void initActionClient();
 		void waitResult();
+		void waitReload();
 
 		// For action server
 		rclcpp_action::GoalResponse handle_goal(
@@ -88,6 +89,7 @@ class ActionManager : public rclcpp::Node
 		bool wait_result_;
 		double marker_x_, marker_y_, marker_t_;
 		bool succeed_;
+		
 };
 }
 
