@@ -36,9 +36,11 @@ namespace ArucoMarkerNavigation{
 		this->get_parameter("torelance_angle_error", torelance_angle_error_);
 		this->declare_parameter("torelance_length_error", 0.1);
 		this->get_parameter("torelance_length_error", torelance_length_error_);
-		this->declare_parameter("kp_x", 10.);
+		this->declare_parameter("kp_x", 5.);
 		this->get_parameter("kp_x", kp_x_);
-		this->declare_parameter("kp_t", 10.);
+		this->declare_parameter("kp_y", 2.);
+		this->get_parameter("kp_y", kp_y_);
+		this->declare_parameter("kp_t", 5.);
 		this->get_parameter("kp_t", kp_t_);
 		this->declare_parameter("torelance_lost_time", 5);
 		this->get_parameter("torelance_lost_time", torelance_lost_time_);
@@ -118,7 +120,7 @@ namespace ArucoMarkerNavigation{
 				error_x = xs_[index] - goal_movement_length;
 				error_y = ys_[index];
 				error_t = 0. - ts_[index];
-				double ang_vel_y = kp_t_*error_y, ang_vel_t = kp_t_*error_t;
+				double ang_vel_y = kp_y_*error_y, ang_vel_t = kp_t_*error_t;
 				//if(abs(ang_vel_y) > abs(ang_vel_t)) pubCmdVel(kp_x_*error_x, ang_vel_y);
 				//else pubCmdVel(kp_x_*error_x, ang_vel_t);
 				pubCmdVel(kp_x_*error_x, ang_vel_t);
@@ -127,12 +129,11 @@ namespace ArucoMarkerNavigation{
 				result->et = ts_[index];
 			}
 			loop_rate.sleep();
-		}while(abs(error_x) > torelance_length_error_ || abs(error_t) > torelance_angle_error_); 
+		//}while(abs(error_x) > torelance_length_error_ || abs(error_t) > torelance_angle_error_); 
+		}while(abs(error_x) > torelance_length_error_); 
 		pubCmdVel(0., 0.);
 		result->id = goal_id;
-		if(abs(result->ex) <= torelance_length_error_ && 
-		   abs(result->ey) <= torelance_length_error_ && 
-		   abs(result->et) <= torelance_angle_error_){
+		if(abs(result->ex) <= torelance_length_error_){ 
 			result->success = true;
 		}else{
 			result->success = false;

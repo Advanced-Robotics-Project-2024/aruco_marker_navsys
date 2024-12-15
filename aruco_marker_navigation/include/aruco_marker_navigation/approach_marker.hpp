@@ -64,7 +64,7 @@ class ApproachMarker : public rclcpp::Node
 		nav_msgs::msg::Odometry odom_;
 		double torelance_length_error_;
 		double torelance_angle_error_;
-		double kp_x_, kp_t_;
+		double kp_x_, kp_y_, kp_t_;
 		int torelance_lost_time_;
 		int torelance_lost_count_;
 
