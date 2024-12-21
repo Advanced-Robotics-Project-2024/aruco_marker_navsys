@@ -105,19 +105,19 @@ namespace ArucoMarkerNavigation{
 			}else{
 				double dx = odom_.pose.pose.position.x - last_odom.pose.pose.position.x;
 				double dy = odom_.pose.pose.position.y - last_odom.pose.pose.position.y;
-				RCLCPP_INFO(this->get_logger(), "Movement Length: %lf", movement_length);
+				//RCLCPP_INFO(this->get_logger(), "Movement Length: %lf", movement_length);
 				if(goal_movement_length - movement_length > 0.){
 					msg.linear.x = max_linear_vel_;
-					RCLCPP_INFO(this->get_logger(), "Foward");
+				//	RCLCPP_INFO(this->get_logger(), "Foward");
 					movement_length += hypot(dy, dx);
 				}else{
 					msg.linear.x = -max_linear_vel_;
-					RCLCPP_INFO(this->get_logger(), "Back");
+				//	RCLCPP_INFO(this->get_logger(), "Back");
 					movement_length -= hypot(dy, dx);
 				}
 				cmd_vel_pub_->publish(msg);
 				last_odom = odom_;
-				RCLCPP_INFO(this->get_logger(), "Goal Movement Length: %lf", goal_movement_length);
+				//RCLCPP_INFO(this->get_logger(), "Goal Movement Length: %lf", goal_movement_length);
 			}
 			loop_rate.sleep();
 		}

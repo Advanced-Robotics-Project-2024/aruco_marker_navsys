@@ -30,6 +30,8 @@ namespace ArucoMarkerNavigation{
 	{
 		this->declare_parameter("loop_rate", 20);
 		this->get_parameter("loop_rate", loop_rate_);
+		this->declare_parameter("load_time", 20000);
+		this->get_parameter("load_time", load_time_);
 	}
 
 	void ActionManager::initActionServer()
@@ -146,6 +148,7 @@ namespace ArucoMarkerNavigation{
 		int goal_id = goal_handle->get_goal()->goal_id;
 		double goal_length = goal_handle->get_goal()->goal_length;
 		RCLCPP_INFO(this->get_logger(), "Recieved Navigation Request to Marker(%d)", goal_id);
+		double rtn_x = odom_x_, rtn_y = odom_y_, rtn_t = odom_t_;
 		while(!succeed_){
 			// Send Goal to RoateAction
 			RotateActionMsg::Goal rotate_action_goal_msg;
@@ -200,12 +203,37 @@ namespace ArucoMarkerNavigation{
 		}
 		succeed_ = false;
 		waitReload();
-		AdjustDirectionMsg::Goal adjust_direction_goal_msg;
 
-	    adjust_direction_goal_msg.goal_rotate_direction = -M_PI / 2;
+		// Calculate distance and orientation between current position and original position
+		RCLCPP_INFO(this->get_logger(), "(org_x, org_y)=(%lf, %lf)", rtn_x, rtn_y);
+		RCLCPP_INFO(this->get_logger(), "(odom_x, odom_y)=(%lf, %lf)", odom_x_, odom_y_);
+		double dx = odom_x_ - rtn_x, dy = odom_y_ - rtn_y;
+		double dtheta = M_PI + atan2(dy, dx) - odom_t_, length = hypot(dx, dy);
+		RCLCPP_INFO(get_logger(), "dtheta=%lf, (dx, dy)=(%lf, %lf)", dtheta, dx, dy);
+
+		AdjustDirectionMsg::Goal adjust_direction_goal_msg;
+	        adjust_direction_goal_msg.goal_rotate_direction = dtheta;
 		while(!this->adjust_direction_client_->wait_for_action_server()){
 			RCLCPP_INFO(get_logger(), "Waiting for action server...");
-		}
+		}	
+		wait_result_ = true;
+		adjust_direction_client_->async_send_goal(adjust_direction_goal_msg, adjust_direction_goal_options_);
+		waitResult();
+
+		RCLCPP_INFO(this->get_logger(), "Return Before Point");
+		AdjustPositionMsg::Goal adjust_position_goal_msg;
+                adjust_position_goal_msg.movement_length = length;
+                while(!this->adjust_position_client_->wait_for_action_server()){
+			RCLCPP_INFO(get_logger(), "Waiting for action server...");
+                }
+                wait_result_ = true;
+                adjust_position_client_->async_send_goal(adjust_position_goal_msg, adjust_position_goal_options_);
+                waitResult();
+
+	        adjust_direction_goal_msg.goal_rotate_direction = odom_t_ - rtn_t;
+		while(!this->adjust_direction_client_->wait_for_action_server()){
+			RCLCPP_INFO(get_logger(), "Waiting for action server...");
+		}	
 		wait_result_ = true;
 		adjust_direction_client_->async_send_goal(adjust_direction_goal_msg, adjust_direction_goal_options_);
 		waitResult();
@@ -215,6 +243,16 @@ namespace ArucoMarkerNavigation{
 
 	void ActionManager::initPubSub()
 	{
+		odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("odom", rclcpp::QoS(10), 
+				std::bind(&ActionManager::odomCb, this, std::placeholders::_1));
+	}
+
+	void ActionManager::odomCb(nav_msgs::msg::Odometry::ConstSharedPtr msg)
+    	{
+		//RCLCPP_INFO(this->get_logger(), "Received Odometry");
+	        odom_x_ = msg->pose.pose.position.x;
+	        odom_y_ = msg->pose.pose.position.y;
+		odom_t_ = tf2::getYaw(msg->pose.pose.orientation);
 	}
 
 	void ActionManager::waitResult()
@@ -228,8 +266,9 @@ namespace ArucoMarkerNavigation{
 	void ActionManager::waitReload()
 	{
 		  using namespace std::chrono_literals;
+		  auto time = std::chrono::milliseconds(load_time_);
 		  RCLCPP_INFO(this->get_logger(), "Waiting for Reload");
-		  rclcpp::sleep_for(15000ms);
+		  rclcpp::sleep_for(time);
 		  RCLCPP_INFO(this->get_logger(), "Finished Waiting for Reload");
 	}
 }

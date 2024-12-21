@@ -13,6 +13,7 @@
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
+#include <nav_msgs/msg/odometry.hpp>
 
 #include <vector>
 
@@ -54,17 +55,18 @@ class ActionManager : public rclcpp::Node
 		rclcpp_action::GoalResponse handle_goal(
 				[[maybe_unused]] const rclcpp_action::GoalUUID & uuid,
 				[[maybe_unused]] std::shared_ptr<const ActionManagerMsg::Goal> goal
-    	);
+	    	);
 		rclcpp_action::CancelResponse handle_cancel(
-    	    const std::shared_ptr<GoalHandleActionManager> goal_handle
-    	);
+	    	    const std::shared_ptr<GoalHandleActionManager> goal_handle
+	    	);
 		void handle_accepted(
-    	    const std::shared_ptr<GoalHandleActionManager> goal_handle
-    	);
+	    	    const std::shared_ptr<GoalHandleActionManager> goal_handle
+	    	);
+	    	void execute(
+	    	    const std::shared_ptr<GoalHandleActionManager> goal_handle
+	    	);
 
-    	void execute(
-    	    const std::shared_ptr<GoalHandleActionManager> goal_handle
-    	);
+		void odomCb(nav_msgs::msg::Odometry::ConstSharedPtr msg);
 	
 	private:
 		rclcpp_action::Server<ActionManagerMsg>::SharedPtr rotate_action_srv_;
@@ -89,7 +91,10 @@ class ActionManager : public rclcpp::Node
 		bool wait_result_;
 		double marker_x_, marker_y_, marker_t_;
 		bool succeed_;
-		
+		int load_time_;		
+		double odom_x_, odom_y_, odom_t_;
+
+		rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
 };
 }
 

@@ -19,8 +19,8 @@ class ArucoMarkerDetector():
         self.angle_of_view = 55.0
         self.k = 0.0
         self.tolerance_error = 30.0
-        #self.marker_length = 0.085 # actual
-        self.marker_length = 0.1 # simulator
+        self.marker_length = 0.085 # actual
+        #self.marker_length = 0.1 # simulator
         pkg_dir = get_package_share_directory('aruco_marker_detector_py')
         self.mtx = np.load(os.path.join(pkg_dir, 'mtx.npy'))
         self.dist = np.load(os.path.join(pkg_dir, 'dist.npy'))

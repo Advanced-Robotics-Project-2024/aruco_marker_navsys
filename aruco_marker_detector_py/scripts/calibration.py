@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -17,7 +16,7 @@ pattern_points *= square_size
 objpoints = []
 imgpoints = []
 
-capture = cv2.VideoCapture(4)
+capture = cv2.VideoCapture(0)
 
 while len(objpoints) < reference_img:
 # 画像の取得
@@ -38,7 +37,7 @@ while len(objpoints) < reference_img:
 		imgpoints.append(corner.reshape(-1, 2))   #appendメソッド：リストの最後に因数のオブジェクトを追加
 		objpoints.append(pattern_points)
 
-	cv2.imshow('image', img)
+	#cv2.imshow('image', img)
 	# 毎回判定するから 200 ms 待つ．遅延するのはココ
 	# if 0xFF == ord('q'):
 	if cv2.waitKey(200) & 0xFF == ord('q'):
