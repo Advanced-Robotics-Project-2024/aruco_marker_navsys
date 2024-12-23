@@ -230,7 +230,7 @@ namespace ArucoMarkerNavigation{
                 adjust_position_client_->async_send_goal(adjust_position_goal_msg, adjust_position_goal_options_);
                 waitResult();
 
-	        adjust_direction_goal_msg.goal_rotate_direction = M_PI + odom_t_ - rtn_t;
+	        adjust_direction_goal_msg.goal_rotate_direction = odom_t_ - rtn_t - M_PI  / 2;
 		while(!this->adjust_direction_client_->wait_for_action_server()){
 			RCLCPP_INFO(get_logger(), "Waiting for action server...");
 		}	
