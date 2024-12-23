@@ -92,17 +92,19 @@ namespace ArucoMarkerNavigation{
 		double goal_rotate_direction = goal_handle->get_goal()->goal_rotate_direction;
 		geometry_msgs::msg::Twist msg;
 		nav_msgs::msg::Odometry last_odom;
-		double goal_robot_direction = tf2::getYaw(odom_.pose.pose.orientation) + goal_rotate_direction;
-		while(goal_robot_direction > M_PI) goal_robot_direction -= 2*M_PI;
-		while(goal_robot_direction < -M_PI) goal_robot_direction += 2*M_PI;
-		RCLCPP_INFO(this->get_logger(), "Goal Robot Direction: %lf", goal_robot_direction);
-		while(abs(goal_robot_direction - tf2::getYaw(odom_.pose.pose.orientation)) > torelance_error_){
-			if(goal_robot_direction - tf2::getYaw(odom_.pose.pose.orientation) > 0){
+		double total_rotate = 0.;
+		//double goal_robot_direction = tf2::getYaw(odom_.pose.pose.orientation) + goal_rotate_direction;
+		//while(goal_robot_direction > M_PI) goal_robot_direction -= 2*M_PI;
+		//while(goal_robot_direction < -M_PI) goal_robot_direction += 2*M_PI;
+		//RCLCPP_INFO(this->get_logger(), "Goal Robot Direction: %lf", goal_robot_direction);
+		while(abs(goal_rotate_direction - total_rotate) > torelance_error_){
+			if(goal_rotate_direction > total_rotate){
 				msg.angular.z = max_angular_vel_;
 			}else{
 				msg.angular.z = -max_angular_vel_;
 			}
 			cmd_vel_pub_->publish(msg);
+			total_rotate += msg.angular.z / loop_rate_;
 			loop_rate.sleep();
 		}
 		msg.angular.z = 0.;
