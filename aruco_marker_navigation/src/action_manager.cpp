@@ -229,14 +229,16 @@ namespace ArucoMarkerNavigation{
                 wait_result_ = true;
                 adjust_position_client_->async_send_goal(adjust_position_goal_msg, adjust_position_goal_options_);
                 waitResult();
-
-	        adjust_direction_goal_msg.goal_rotate_direction = odom_t_ - rtn_t - M_PI  / 2;
+		
+		RCLCPP_INFO(this->get_logger(), "Odom_t: %lf, Org_t: %lf", odom_t_, rtn_t);
+	        adjust_direction_goal_msg.goal_rotate_direction = rtn_t - odom_t_;
 		while(!this->adjust_direction_client_->wait_for_action_server()){
 			RCLCPP_INFO(get_logger(), "Waiting for action server...");
 		}	
 		wait_result_ = true;
 		adjust_direction_client_->async_send_goal(adjust_direction_goal_msg, adjust_direction_goal_options_);
 		waitResult();
+		RCLCPP_INFO(this->get_logger(), "Odom_t: %lf", odom_t_);
 
 		RCLCPP_INFO(this->get_logger(), "Completed Navigation to Marker(%lf)", goal_length);
 	}
